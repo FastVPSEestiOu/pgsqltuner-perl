@@ -115,15 +115,47 @@ sub humanize {
     return $number;
 }
 
-sub get_pg_version {
+sub get_pg_version_pg_config {
     my $output = `pg_config --version 2>&1`;
     if ($?) {
-        die "cannot run pg_config\n$output";
+        warn "cannot run pg_config\n$output";
+        return 0;
     }
     chomp $output;
     $output =~ s/.*\s+//;
     $output =~ s/^(\d+\.\d+).*/$1/;
     return $output;
+}
+
+sub get_pg_version_ps {
+    my @output = `ps eaxo command 2>&1`;
+    if ($?) {
+        warn 'cannot run ps';
+        return 0;
+    }
+    # Get version from linee
+    # /usr/lib/postgresql/9.1/bin/postgres -D /var/lib/postgresql/9.1/main -c config_file=/etc/postgresql/9.1/main/postgresql.confPG_GRANDPARENT_PID=2617 PGLOCALEDIR=/usr/share/locale PGSYSCONFDIR=/etc/postgresql-common PWD=/var/lib/postgresql PGDATA=/var/lib/postgresql/9.1/main
+
+    for my $line ( @output) {
+        if ( $line =~ m|bin/postgres| ) {
+            $line =~ /(\d+\.\d+)/;
+            if ( defined $1 ) {
+                return $1;
+            } else {
+                return 0;
+            }
+        }
+    }
+    return 0;
+}
+
+sub get_pg_version {
+    my $version = get_pg_version_ps();
+    if ( $version ) {
+        return $version;
+    }
+    
+    return get_pg_version_pg_config();
 }
 
 sub get_shmmax {
