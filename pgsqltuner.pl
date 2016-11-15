@@ -9,6 +9,7 @@ use Getopt::Long;
 
 my $memory_total_gb = 0;
 my $pg_version = 0;
+my $shmmax = 0;
 
 
 GetOptions (
@@ -31,8 +32,16 @@ if ( $pg_version == 0 ) {
     }
 } 
 
+if ( $shmmax == 0 ) {
+    $shmmax = get_shmmax();
+    if ( $shmmax == 0 ) {
+        die "Cannot get kernel.shmmax - exit\n";
+    }
+}
+
 print "We have $memory_total_gb Gb total memory\n";
 print "We have postgres $pg_version\n";
+print "We have kernel.shmmax " . humanize($shmmax) ."\n";
 
 # in kB
 my %params = (
@@ -50,6 +59,13 @@ if ( $pg_version < 9.5 ) {
 }
 else {
     $params{'max_wal_size'} = 1536*1024;
+}
+
+if ( $pg_version < 9.4 ) {
+    $params{'shared_buffers'} = $shmmax * 0.625;
+}
+else {
+    $params{'shared_buffers'} = 128*1024 * $memory_total_gb;
 }
 
 print "\n\n";
@@ -110,3 +126,13 @@ sub get_pg_version {
     return $output;
 }
 
+sub get_shmmax {
+    my $output = `sysctl -n kernel.shmmax 2>&1`;
+    if ($?) {
+        die "cannot get kernel.shmmax\n$output";
+    }
+    chomp $output;
+    # Convert to KB
+    $output = $output/1024.0;
+    return sprintf("%0.0f",$output);
+}
