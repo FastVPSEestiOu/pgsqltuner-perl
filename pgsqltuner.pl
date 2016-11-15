@@ -72,7 +72,7 @@ else {
     $params{'max_wal_size'} = 1536*1024;
 }
 
-if ( $pg_version < 9.4 ) {
+if ( $pg_version < 9.3 ) {
     $params{'shared_buffers'} = $shmmax * 0.625;
 }
 else {
