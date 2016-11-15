@@ -57,7 +57,7 @@ print "We have kernel.shmmax " . humanize($shmmax) ."\n";
 # in kB
 my %params = (
     'work_mem' => 1024 * $memory_total_gb,
-    'maitenance_work_mem' => 32*1024 * $memory_total_gb,
+    'maintenance_work_mem' => 32*1024 * $memory_total_gb,
     'fsync' => "off",
     'synchronous_commit' => "off",
     'wal_buffers' => 256 * $memory_total_gb,
