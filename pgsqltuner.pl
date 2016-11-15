@@ -10,13 +10,24 @@ use Getopt::Long;
 my $memory_total_gb = 0;
 my $pg_version = 0;
 my $shmmax = 0;
+my $help = 0;
 
+my $usage = "pgsqltuner.pl - is a script written in Perl that will assist you with your postgres configuration\n
+Usage:\n\tpgsqltuner.pl [ -m MEMORY ] [ -p PG_VERSION ] [ -h|--help ]
+\t\t-m - set total memory in Gb
+\t\t-p - set postgres version like 9.5
+\t\t-h - show this message\n";
 
 GetOptions (
-    "m=s"   => \$memory_total_gb,  # Total memory
-    "p=s"   => \$pg_version,       # postgres version
-) or die "Error in command line arguments!\n";
+    "m=f"    => \$memory_total_gb,  # Total memory
+    "p=f"    => \$pg_version,       # postgres version
+    "h|help" => \$help,
+) or die "Error in command line arguments!\n$usage\n";
 
+if ( $help ) {
+    print $usage,"\n";
+    exit 0;
+}
 
 if ( $memory_total_gb == 0 ) {
     $memory_total_gb = get_total_mem();
