@@ -165,9 +165,9 @@ sub get_pg_version_ps {
     }
     # Get version from linee
     # /usr/lib/postgresql/9.1/bin/postgres -D /var/lib/postgresql/9.1/main -c config_file=/etc/postgresql/9.1/main/postgresql.confPG_GRANDPARENT_PID=2617 PGLOCALEDIR=/usr/share/locale PGSYSCONFDIR=/etc/postgresql-common PWD=/var/lib/postgresql PGDATA=/var/lib/postgresql/9.1/main
-
+    # /usr/pgsql-9.2/bin/postmaster -p 5432 -D /var/lib/pgsql/9.2/data HOSTNAME=CentOS-60-64-ISPLite SHELL=/bin/bash  ....
     for my $line ( @output) {
-        if ( $line =~ m|bin/postgres| ) {
+        if ( $line =~ m(bin/(postgres|postmaster)) ) {
             $line =~ /(\d+\.\d+)/;
             if ( defined $1 ) {
                 return $1;
