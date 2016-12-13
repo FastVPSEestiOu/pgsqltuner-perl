@@ -148,7 +148,11 @@ sub humanize {
 sub get_pg_version_pg_config {
     my $output = `pg_config --version 2>&1`;
     if ($?) {
-        warn "cannot run pg_config\n$output";
+        my $warn_message = "cannot run pg_config\n";
+        if ( defined $output) {
+            $warn_message .= "$output\n";
+        }
+        warn $warn_message;
         return 0;
     }
     chomp $output;
