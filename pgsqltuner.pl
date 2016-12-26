@@ -25,6 +25,7 @@ use warnings;
 use Getopt::Long;
 
 
+my $rounding_limit_mb = 256;
 
 my $memory_total_gb = 0;
 my $pg_version = 0;
@@ -42,6 +43,8 @@ GetOptions (
     "p=f"    => \$pg_version,       # postgres version
     "h|help" => \$help,
 ) or die "Error in command line arguments!\n$usage\n";
+
+### MAIN ###
 
 if ( $help ) {
     print $usage,"\n";
@@ -102,7 +105,7 @@ print "\n\n";
 for my $key ( sort keys %params ) {
     my $value;
     if ( $key ne 'checkpoint_completion_target' &&  $key ne 'checkpoint_segments' ) {
-        $value = humanize($params{$key}); 
+        $value = humanize_for_config($params{$key}); 
     }
     else {
         $value = $params{$key};
@@ -110,7 +113,7 @@ for my $key ( sort keys %params ) {
     print "$key = $value\n";
 }
 
-### get mem
+### OUR SUBS ###
 
 sub get_total_mem {
     open my $fh, "<", "/proc/meminfo" or die "Cannot open /proc/meminfo:$!\n";
@@ -124,6 +127,7 @@ sub get_total_mem {
     return sprintf("%0.1f",$line);
 }
 
+
 sub humanize {
     my $number = shift;
     if ( $number !~ /^\d+(\.\d+)?$/ ) {
@@ -134,13 +138,39 @@ sub humanize {
         return "${number}kB";
     }
 
-    $number = sprintf("%0.0f",$number/1024);
+    $number = sprintf("%0.1f", $number/1024);
 
     if ($number < 1024 ) {
-        return sprintf("%0.0fMB",$number);
+        return sprintf("%0.1fMB", $number);
     } 
     else {
-        return sprintf("%0.0fGB",$number/1024);
+        return sprintf("%0.1fGB", $number/1024);
+    }
+    return $number;
+}
+
+sub humanize_for_config {
+    my $number = shift;
+    if ( $number !~ /^\d+(\.\d+)?$/ ) {
+        return $number;
+    }
+    
+    if ( $number < 1024 ) {
+        return "${number}kB";
+    }
+
+    $number = sprintf("%0.0f", $number/1024);
+
+    if ($number < 1024 ) {
+        return sprintf("%0.0fMB", $number);
+    } 
+    else {
+        my $mod = $number % 1024;
+        if ( $mod < $rounding_limit_mb ) {
+            return sprintf("%0.0fGB", $number/1024);
+        } else {
+            return sprintf("%0.0fMB", $number);
+        }
     }
     return $number;
 }
