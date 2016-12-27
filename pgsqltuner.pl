@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+# This project would not be possible without help from Denis Maksimov.
+# 
 # Inspired by http://mysqltuner.com/ ( http://github.com/major/MySQLTuner-perl )
 # 
 
@@ -101,7 +103,7 @@ else {
     $params{'shared_buffers'} = 128*1024 * $memory_total_gb;
 }
 
-print "\n\n";
+print "\n\n#### Recommendations ####\n";
 for my $key ( sort keys %params ) {
     my $value;
     if ( $key ne 'checkpoint_completion_target' &&  $key ne 'checkpoint_segments' ) {
