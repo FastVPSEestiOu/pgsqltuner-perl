@@ -204,9 +204,12 @@ sub get_pg_version_ps {
     # /usr/pgsql-9.2/bin/postmaster -p 5432 -D /var/lib/pgsql/9.2/data HOSTNAME=CentOS-60-64-ISPLite SHELL=/bin/bash  ....
     for my $line ( @output) {
         if ( $line =~ m(bin/(postgres|postmaster)) ) {
-            $line =~ /(\d+\.\d+)/;
-            if ( defined $1 ) {
-                return $1;
+            if ( $line =~ /(\d+\.\d+)/ ) {
+                if ( defined $1 ) {
+                    return $1;
+                } else {
+                    return 0;
+                }
             } else {
                 return 0;
             }
